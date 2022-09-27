@@ -1,6 +1,6 @@
 #include "game.h"
 
-int main()
+void Game::render()
 {
-	return 0;
+
 }
