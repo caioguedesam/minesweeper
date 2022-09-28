@@ -1,17 +1,13 @@
 /*
 
-Game architecture:
-	> UI
-		> User input
-		> Has ref to game, calls set_game_state on button press
-		> Renders differently based on game state
-	> Game
-		> Keeps internal game state
-		> Game loop: change state if needed, wait for input, process input
-		> Has ref to board, alters board when processing input
-	> Board
-		> Matrix of tiles
+Main loop w/ CLI:
+	> UI clear
+	> UI render game state
+		> state dependant
+	> UI polls for user input (waits on scanf)
+		> when input is read, process input for given game state
 
+TODO: main loop w/ GUI
 */
 
 #include "game.h"
