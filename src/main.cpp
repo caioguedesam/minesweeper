@@ -10,9 +10,18 @@ Main loop w/ CLI:
 TODO: main loop w/ GUI
 */
 
-#include "game.h"
+#include "ui.h"
 
 int main()
 {
+	Game game;
+
+	while (true)
+	{
+		ui_clear();
+		ui_render_game(&game);
+		ui_poll_input(&game);
+	}
+
 	return 0;
 }

@@ -3,9 +3,9 @@
 
 enum class GameState
 {
-	STARTING,
-	PLAYING,
-	ENDED,
+	STARTING	= 1,
+	PLAYING		= 2,
+	ENDED		= 3,
 };
 
 enum class GameDifficulty
