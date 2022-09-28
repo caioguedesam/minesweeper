@@ -9,11 +9,17 @@ struct Tile
 	bool revealed = false;
 	bool has_bomb = false;
 	bool has_flag = false;
+	int adjacent_bombs = -1;
+
+	void reset();
 };
 
-class Board
+struct Board
 {
-public:
+	int width = 0;
+	int height = 0;
+	Tile grid[BOARD_MAX_WIDTH][BOARD_MAX_HEIGHT];
+
 	void init(int w, int h, int bombs);
 
 	void clear();
@@ -25,9 +31,4 @@ public:
 	void reveal_tile(int x, int y);
 	int get_adjacent_bombs(int x, int y);
 	void toggle_flag(int x, int y);
-	
-private:
-	int width	= 0;
-	int height	= 0;
-	Tile grid[BOARD_MAX_WIDTH][BOARD_MAX_HEIGHT];
 };

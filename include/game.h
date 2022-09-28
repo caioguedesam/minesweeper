@@ -21,20 +21,18 @@ enum class GameAction
 	TOGGLE_FLAG,
 };
 
-class Game
+struct Game
 {
-public:
+	GameState state;
+	GameDifficulty difficulty;
+	bool won_game = false;
+
+	Board board;
+
 	void reset();								// ENDED	-> STARTING
 	void start(GameDifficulty new_difficulty);	// STARTING -> PLAYING
 	void process_action(GameAction action, int x, int y);
 	void check_end_condition();					// PLAYING	-> ENDED
 
 	bool is_won();
-
-private:
-	GameState state;
-	GameDifficulty difficulty;
-	bool won_game = false;
-
-	Board board;
 };
