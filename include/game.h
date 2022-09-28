@@ -1,16 +1,40 @@
 #pragma once
-#include "stdio.h"
+#include "board.h"
+
+enum class GameState
+{
+	STARTING,
+	PLAYING,
+	ENDED,
+};
+
+enum class GameDifficulty
+{
+	BEGINNER,
+	INTERMEDIATE,
+	EXPERT,
+};
+
+enum class GameAction
+{
+	REVEAL_TILE,
+	TOGGLE_FLAG,
+};
 
 class Game
 {
 public:
-	void init();
-	void destroy();
+	void reset();								// ENDED	-> STARTING
+	void start(GameDifficulty new_difficulty);	// STARTING -> PLAYING
+	void process_action(GameAction action, int x, int y);
+	void check_end_condition();					// PLAYING	-> ENDED
 
-	void poll_input();
-	void update();
-	void render();
+	bool is_won();
 
 private:
-	bool is_running = true;
+	GameState state;
+	GameDifficulty difficulty;
+	bool won_game = false;
+
+	Board board;
 };

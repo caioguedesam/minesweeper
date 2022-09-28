@@ -1,22 +1,33 @@
 #pragma once
 #include <stdint.h>
 
-enum GameDifficulty : uint8_t
+#define BOARD_MAX_WIDTH		30
+#define BOARD_MAX_HEIGHT	16
+
+struct Tile
 {
-	DIFFICULTY_BEGINNER,
-	DIFFICULTY_INTERMEDIATE,
-	DIFFICULTY_EXPERT,
+	bool revealed = false;
+	bool has_bomb = false;
+	bool has_flag = false;
 };
 
 class Board
 {
 public:
-	void init(GameDifficulty difficulty);
-	void destroy();
+	void init(int w, int h, int bombs);
+
+	void clear();
+	bool is_on_win_state();
+	bool is_on_lose_state();
+
+	bool is_on_bounds(int x, int y);
+
+	void reveal_tile(int x, int y);
+	int get_adjacent_bombs(int x, int y);
+	void toggle_flag(int x, int y);
 	
 private:
-	GameDifficulty difficulty	= DIFFICULTY_BEGINNER;
-	uint32_t width				= 0;
-	uint32_t height				= 0;
-	int* data					= nullptr;
+	int width	= 0;
+	int height	= 0;
+	Tile grid[BOARD_MAX_WIDTH][BOARD_MAX_HEIGHT];
 };
