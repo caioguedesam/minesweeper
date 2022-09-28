@@ -3,16 +3,16 @@
 
 enum class GameState
 {
-	STARTING	= 1,
-	PLAYING		= 2,
-	ENDED		= 3,
+	STARTING,
+	PLAYING,
+	ENDED,
 };
 
 enum class GameDifficulty
 {
-	BEGINNER,
-	INTERMEDIATE,
-	EXPERT,
+	BEGINNER		= 1,
+	INTERMEDIATE	= 2,
+	EXPERT			= 3,
 };
 
 enum class GameAction
@@ -23,8 +23,8 @@ enum class GameAction
 
 struct Game
 {
-	GameState state;
-	GameDifficulty difficulty;
+	GameState state	= GameState::STARTING;
+	GameDifficulty difficulty = GameDifficulty::BEGINNER;
 	bool won_game = false;
 
 	Board board;

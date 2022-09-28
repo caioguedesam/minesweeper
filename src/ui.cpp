@@ -42,6 +42,7 @@ void ui_render_board(Game* game)
 			CLI_PRINTT("%c", visual);
 		}
 		CLI_PRINTLN("");
+		CLI_PRINTLN("");
 	}
 }
 
@@ -90,7 +91,7 @@ void ui_poll_input(Game* game)
 	case GameState::STARTING:
 	{
 		int input_difficulty = 0;
-		while (input_difficulty < 0 || input_difficulty > 3)
+		while (input_difficulty <= 0 || input_difficulty > 3)
 		{
 			scanf(" %d", &input_difficulty);
 		}
