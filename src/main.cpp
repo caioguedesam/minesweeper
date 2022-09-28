@@ -21,6 +21,7 @@ int main()
 		ui_clear();
 		ui_render_game(&game);
 		ui_poll_input(&game);
+		game.check_end_condition();
 	}
 
 	return 0;

@@ -2,17 +2,17 @@
 #include "game.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#define CLI_PRINT(MSG, ...)\
+do {\
+	printf(MSG, __VA_ARGS__);\
+} while(false)
 
 #define CLI_PRINTLN(MSG, ...)\
 do {\
 	printf(MSG, __VA_ARGS__);\
 	printf("\n");\
-} while(false)
-
-#define CLI_PRINTT(MSG, ...)\
-do {\
-	printf(MSG, __VA_ARGS__);\
-	printf("\t");\
 } while(false)
 
 void ui_clear()
@@ -23,8 +23,23 @@ void ui_clear()
 void ui_render_board(Game* game)
 {
 	Board& board = game->board;
+
+	CLI_PRINT("%*c", 5, ' ');
+
+	for (int j = 0; j < board.height; j++)
+	{
+		CLI_PRINT("%*c", 5, j + '0');
+	}
+	CLI_PRINTLN("");
+	for (int j = 0; j <= board.height; j++)
+	{
+		CLI_PRINT("%*c", 5, '_');
+	}
+	CLI_PRINTLN("");
+
 	for (int i = 0; i < board.width; i++)
 	{
+		CLI_PRINT("%*c|", 4, i + '0');
 		for (int j = 0; j < board.height; j++)
 		{
 			Tile& tile = board.grid[i][j];
@@ -39,7 +54,7 @@ void ui_render_board(Game* game)
 				visual = 'F';
 			}
 
-			CLI_PRINTT("%c", visual);
+			CLI_PRINT("%*c", 5, visual);
 		}
 		CLI_PRINTLN("");
 		CLI_PRINTLN("");
@@ -86,6 +101,7 @@ void ui_render_game(Game* game)
 
 void ui_poll_input(Game* game)
 {
+	fflush(stdout);
 	switch (game->state)
 	{
 	case GameState::STARTING:
@@ -109,6 +125,7 @@ void ui_poll_input(Game* game)
 	} break;
 	case GameState::ENDED:
 	{
+		getchar();
 		getchar();
 		game->reset();
 	} break;

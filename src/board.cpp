@@ -21,6 +21,9 @@ void Board::clear()
 	}
 	width = 0;
 	height = 0;
+	bomb_count = 0;
+	revealed_tiles = 0;
+	revealed_bomb = false;
 }
 
 void Board::init(int w, int h, int bombs)
@@ -28,6 +31,7 @@ void Board::init(int w, int h, int bombs)
 	clear();
 	width = w;
 	height = h;
+	bomb_count = bombs;
 
 	// Simples amostragem aleatória com white noise para colocação de bombas
 	while (bombs)
@@ -59,29 +63,12 @@ void Board::init(int w, int h, int bombs)
 
 bool Board::is_on_win_state()
 {
-	for (int i = 0; i < width; i++)
-	{
-		for (int j = 0; j < height; j++)
-		{
-			Tile& tile = grid[i][j];
-			if (!tile.revealed && !tile.has_bomb) return false;
-			if (tile.revealed && tile.has_bomb) return false;
-		}
-	}
-	return true;
+	return revealed_tiles == (width * height) - bomb_count;
 }
 
 bool Board::is_on_lose_state()
 {
-	for (int i = 0; i < width; i++)
-	{
-		for (int j = 0; j < height; j++)
-		{
-			Tile& tile = grid[i][j];
-			if (tile.has_bomb && tile.revealed) return true;
-		}
-	}
-	return false;
+	return revealed_bomb;
 }
 
 bool Board::is_on_bounds(int x, int y)
@@ -94,9 +81,15 @@ void Board::reveal_tile(int x, int y)
 	if (!is_on_bounds(x, y)) return;
 
 	Tile& tile = grid[x][y];
-	if (tile.revealed || tile.has_bomb) return;
+	if (tile.revealed) return;
 
 	tile.revealed = true;
+	revealed_tiles++;
+	if (tile.has_bomb)
+	{
+		revealed_bomb = true;
+		return;	// kaboom
+	}
 	
 	if (get_adjacent_bombs(x, y) == 0)
 	{
