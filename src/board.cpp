@@ -12,9 +12,9 @@ void Tile::reset()
 
 void Board::clear()
 {
-	for (int i = 0; i < BOARD_MAX_WIDTH; i++)
+	for (int i = 0; i < BOARD_MAX_HEIGHT; i++)
 	{
-		for (int j = 0; j < BOARD_MAX_HEIGHT; j++)
+		for (int j = 0; j < BOARD_MAX_WIDTH; j++)
 		{
 			grid[i][j].reset();
 		}
@@ -36,8 +36,8 @@ void Board::init(int w, int h, int bombs)
 	// Simples amostragem aleatória com white noise para colocação de bombas
 	while (bombs)
 	{
-		int x = dist_uniform(0, width + 1);
-		int y = dist_uniform(0, height + 1);
+		int x = dist_uniform(0, height + 1);
+		int y = dist_uniform(0, width + 1);
 		Tile& tile = grid[x][y];
 		if (!tile.has_bomb)
 		{
@@ -47,9 +47,9 @@ void Board::init(int w, int h, int bombs)
 	}
 
 	// Fazendo cache de bombas adjacentes por tile para eliminar checagens redundantes
-	for (int i = 0; i < width; i++)
+	for (int i = 0; i < height; i++)
 	{
-		for (int j = 0; j < height; j++)
+		for (int j = 0; j < width; j++)
 		{
 			Tile& tile = grid[i][j];
 			int adj_bombs = get_adjacent_bombs(i, j);
@@ -73,7 +73,7 @@ bool Board::is_on_lose_state()
 
 bool Board::is_on_bounds(int x, int y)
 {
-	return x >= 0 && y >= 0 && x < width && y < height;
+	return x >= 0 && y >= 0 && x < height && y < width;
 }
 
 void Board::reveal_tile(int x, int y)

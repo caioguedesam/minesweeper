@@ -18,7 +18,7 @@ struct Board
 {
 	int width = 0;
 	int height = 0;
-	Tile grid[BOARD_MAX_WIDTH][BOARD_MAX_HEIGHT];
+	Tile grid[BOARD_MAX_HEIGHT][BOARD_MAX_WIDTH];
 	int bomb_count = 0;
 	int revealed_tiles = 0;
 	bool revealed_bomb = false;

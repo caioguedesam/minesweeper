@@ -20,31 +20,31 @@ void ui_clear()
 	system("cls || clear");		// Clear on linux and windows hack :p
 }
 
-void ui_render_board(Game* game)
+void ui_render_board(Game* game, bool show_all = false)
 {
 	Board& board = game->board;
 
 	CLI_PRINT("%*c", 5, ' ');
 
-	for (int j = 0; j < board.height; j++)
+	for (int j = 0; j < board.width; j++)
 	{
-		CLI_PRINT("%*c", 5, j + '0');
+		CLI_PRINT("%*d", 5, j);
 	}
 	CLI_PRINTLN("");
 	for (int j = 0; j <= board.height; j++)
 	{
-		CLI_PRINT("%*c", 5, '_');
+		CLI_PRINT("%*c", 5, '-');
 	}
 	CLI_PRINTLN("");
 
-	for (int i = 0; i < board.width; i++)
+	for (int i = 0; i < board.height; i++)
 	{
-		CLI_PRINT("%*c|", 4, i + '0');
-		for (int j = 0; j < board.height; j++)
+		CLI_PRINT("%*d|", 4, i);
+		for (int j = 0; j < board.width; j++)
 		{
 			Tile& tile = board.grid[i][j];
 			char visual = '.';
-			if (tile.revealed)
+			if (tile.revealed || show_all)
 			{
 				if (tile.has_bomb) visual = 'X';
 				else visual = tile.adjacent_bombs + '0';
@@ -70,16 +70,17 @@ void ui_render_game(Game* game)
 		CLI_PRINTLN("============== Campo Minado ==============");
 		CLI_PRINTLN("========= Selecionar Dificuldade =========");
 		CLI_PRINTLN("		1. Iniciante (9x9 - 10 bombas)");
-		CLI_PRINTLN("		2. Intermediário (16x16 - 40 bombas)");
+		CLI_PRINTLN("		2. Intermediario (16x16 - 40 bombas)");
 		CLI_PRINTLN("		3. Expert (16x30 - 99 bombas)");
 		CLI_PRINTLN("==========================================");
-		CLI_PRINTLN("		Digite o número da dificuldade desejada:");
+		CLI_PRINTLN("		Digite o numero da dificuldade desejada:");
 	} break;
 	case GameState::PLAYING:
 	{
 		CLI_PRINTLN("==========================================");
 		ui_render_board(game);
 		CLI_PRINTLN("==========================================");
+		CLI_PRINTLN("		Proxima posicao:");
 	} break;
 	case GameState::ENDED:
 	{
@@ -93,7 +94,9 @@ void ui_render_game(Game* game)
 			CLI_PRINTLN("		Você PERDEU...");
 		}
 		CLI_PRINTLN("==========================================");
-		CLI_PRINTLN("		Pressione Enter para começar um novo jogo:");
+		ui_render_board(game, true);
+		CLI_PRINTLN("==========================================");
+		CLI_PRINTLN("		Pressione Enter para comecar um novo jogo:");
 	} break;
 	default: break;
 	}
@@ -101,7 +104,7 @@ void ui_render_game(Game* game)
 
 void ui_poll_input(Game* game)
 {
-	fflush(stdout);
+	//fflush(stdout);
 	switch (game->state)
 	{
 	case GameState::STARTING:
