@@ -1,12 +1,49 @@
 #pragma once
 #include "game.h"
 
+#include <SFML/Graphics.hpp>
+
 /*
-	TODO: CLI version
 	TODO: Immediate mode GUI version
 */
 
+struct MouseState
+{
+	int pos_x		= 0;
+	int pos_y		= 0;
+	bool is_down	= false;
+	bool is_pressed = false;
+	bool is_up		= false;
+};
+
+bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape& rectangle);
+
+struct UIButtonColors
+{
+	sf::Color standard;
+	sf::Color hovered;
+	sf::Color pressed;
+};
+
+struct UIButton
+{
+	sf::RectangleShape rect;
+	// TODO: Add SPRITE to button
+	// TODO: Add TEXT to button
+};
+
+bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors button_colors);
+
+struct UIState
+{
+	sf::RenderWindow window;
+	MouseState mouse;
+	sf::Color color_background;
+};
+
+void ui_init();
+void ui_poll_input(Game* game);
 void ui_clear();
 void ui_render_board(Game* game, bool show_all = false);
 void ui_render_game(Game* game);
-void ui_poll_input(Game* game);
+void ui_present();

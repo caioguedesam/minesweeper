@@ -1,17 +1,6 @@
-///*
-//
-//Main loop w/ CLI:
-//	> UI clear
-//	> UI render game state
-//		> state dependant
-//	> UI polls for user input (waits on scanf)
-//		> when input is read, process input for given game state
-//
-//TODO: main loop w/ GUI
-//*/
-//
-//#include "ui.h"
-//
+#include "ui.h"
+
+//// CLI MAIN LOOP
 //int main()
 //{
 //	Game game;
@@ -27,27 +16,21 @@
 //	return 0;
 //}
 
-#include <SFML/Graphics.hpp>
-
+// GUI MAIN LOOP
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(200, 200), "SFML works!");
-    sf::CircleShape shape(100.f);
-    shape.setFillColor(sf::Color::Green);
+    Game game;
 
-    while (window.isOpen())
+    ui_init();
+    while (game.is_running)
     {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-        }
-
-        window.clear();
-        window.draw(shape);
-        window.display();
+        ui_poll_input(&game);
+        ui_clear();
+        ui_render_game(&game);
+        ui_present();
+        game.check_end_condition();
     }
+
 
     return 0;
 }

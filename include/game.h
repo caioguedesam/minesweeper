@@ -23,6 +23,7 @@ enum class GameAction
 
 struct Game
 {
+	bool is_running = true;
 	GameState state	= GameState::STARTING;
 	GameDifficulty difficulty = GameDifficulty::BEGINNER;
 	bool won_game = false;
