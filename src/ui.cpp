@@ -8,7 +8,7 @@
 
 #define APP_NAME    "Campo Minado!"
 #define APP_DEFAULT_WIDTH       640
-#define APP_DEFAULT_HEIGHT      640
+#define APP_DEFAULT_HEIGHT      480
 
 #define CLI_PRINT(MSG, ...)\
 do {\
@@ -23,10 +23,15 @@ do {\
 
 UIState ui_state;
 UIResources ui_resources;
-UIButtonColors ui_colors_button_standard =
+UIButtonInfo ui_colors_button_standard =
 {
 	sf::Color(189, 189, 189, 255),
 	sf::Color(150, 150, 150, 255),
+	sf::Color(82, 82, 82, 255),
+	true,
+	3.f,
+	sf::Color(150, 150, 150, 255),
+	sf::Color(82, 82, 82, 255),
 	sf::Color(82, 82, 82, 255),
 };
 
@@ -72,21 +77,25 @@ void ui_text(const char* text_str, sf::Vector2f text_pos, UITextInfo text_info, 
 	ui_state.window.draw(text);
 }
 
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors button_colors)
+bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info)
 {
 	sf::RectangleShape button_rect;
 	sf::Vector2f button_center_pos = button_pos;
 	button_rect.setPosition(button_center_pos);
 	button_rect.setSize(button_size);
-	button_rect.setFillColor(button_colors.standard);
+	button_rect.setFillColor(button_info.color_standard);
+	button_rect.setOutlineThickness(button_info.use_outline ? button_info.outline_thickness : 0.f);
+	button_rect.setOutlineColor(button_info.color_outline_standard);
 
 	bool result = false;
 	if (is_on_rectangle(sf::Vector2f(ui_state.mouse.pos_x, ui_state.mouse.pos_y), button_rect))
 	{
-		button_rect.setFillColor(button_colors.hovered);
+		button_rect.setFillColor(button_info.color_hovered);
+		button_rect.setOutlineColor(button_info.color_outline_hovered);
 		if (ui_state.mouse.is_pressed)
 		{
-			button_rect.setFillColor(button_colors.pressed);
+			button_rect.setFillColor(button_info.color_pressed);
+			button_rect.setOutlineColor(button_info.color_outline_pressed);
 		}
 		if (ui_state.mouse.is_up)
 		{
@@ -98,12 +107,12 @@ bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors
 	return result;
 }
 
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors button_colors, const char* text_str,
+bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info, const char* text_str,
 	sf::Vector2f text_relative_pos, UITextInfo text_info, bool text_centered)
 {
 	// TODO_UI: Esses valores de posicionamento centralizado e não centralizado 
 	// não me parecem totalmente certos. Olhar depois...
-	bool result = ui_button(button_pos, button_size, button_colors);
+	bool result = ui_button(button_pos, button_size, button_info);
 	sf::Vector2f text_pos = button_pos;
 	if (text_centered)
 	{
@@ -261,12 +270,12 @@ void ui_render_game(Game* game)
 		ui_text("Novo jogo:", panel_position, text_info);
 
 		panel_position.x += 20;
-		panel_position.y += 50;
+		panel_position.y += 65;
 		sf::Vector2f button_size = sf::Vector2f(350, 50);
 		ui_button(panel_position, button_size, ui_colors_button_standard, "Iniciante", sf::Vector2f(0, 0), text_info, true);
-		panel_position.y += 75;
+		panel_position.y += 80;
 		ui_button(panel_position, button_size, ui_colors_button_standard, "Intermediário", sf::Vector2f(0, 0), text_info, true);
-		panel_position.y += 75;
+		panel_position.y += 80;
 		ui_button(panel_position, button_size, ui_colors_button_standard, "Expert", sf::Vector2f(0, 0), text_info, true);
 
 	} break;

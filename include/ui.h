@@ -18,11 +18,17 @@ struct MouseState
 
 bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape& rectangle);
 
-struct UIButtonColors
+struct UIButtonInfo
 {
-	sf::Color standard;
-	sf::Color hovered;
-	sf::Color pressed;
+	sf::Color color_standard;
+	sf::Color color_hovered;
+	sf::Color color_pressed;
+	
+	bool use_outline = false;
+	float outline_thickness = 0.f;
+	sf::Color color_outline_standard;
+	sf::Color color_outline_hovered;
+	sf::Color color_outline_pressed;
 };
 
 struct UITextInfo
@@ -34,8 +40,8 @@ struct UITextInfo
 };
 
 void ui_text(const char* text_str, sf::Vector2f text_pos, UITextInfo text_info, bool text_centered = false);
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors button_colors);
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors button_colors, const char* text_str,
+bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info);
+bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info, const char* text_str,
 	sf::Vector2f text_relative_pos, UITextInfo text_info, bool text_centered = false);
 
 struct UIState
