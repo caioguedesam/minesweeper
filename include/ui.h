@@ -25,20 +25,30 @@ struct UIButtonColors
 	sf::Color pressed;
 };
 
-struct UIButton
+struct UITextInfo
 {
-	sf::RectangleShape rect;
-	// TODO: Add SPRITE to button
-	// TODO: Add TEXT to button
+	sf::Font* font = nullptr;
+	sf::Color color;
+	int pixel_size = 0;
+	sf::Text::Style style;
 };
 
+void ui_text(const char* text_str, sf::Vector2f text_pos, UITextInfo text_info, bool text_centered = false);
 bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors button_colors);
+bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonColors button_colors, const char* text_str,
+	sf::Vector2f text_relative_pos, UITextInfo text_info, bool text_centered = false);
 
 struct UIState
 {
 	sf::RenderWindow window;
 	MouseState mouse;
 	sf::Color color_background;
+};
+
+struct UIResources
+{
+	sf::Font font_default;
+	// TODO: Add default sprites (bomb, flag, etc.)
 };
 
 void ui_init();
