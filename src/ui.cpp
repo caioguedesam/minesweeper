@@ -11,6 +11,8 @@
 #define APP_EXPANDED_WIDTH      800
 #define APP_DEFAULT_HEIGHT      480
 
+// ===========================================
+// Estado global e configurações padrão
 UIState ui_state;
 UIResources ui_resources;
 UIButtonInfo ui_button_info_default =
@@ -43,7 +45,11 @@ UIButtonInfo ui_button_info_tile_revealed =
 	sf::Color(150, 150, 150, 255),
 	sf::Color(150, 150, 150, 255),
 	sf::Color(82, 82, 82, 255),
-	false,
+	true,
+	1.f,
+	sf::Color(75, 75, 75, 255),
+	sf::Color(75, 75, 75, 255),
+	sf::Color(75, 75, 75, 255),
 };
 
 sf::Color tile_indicator_colors[] =
@@ -57,48 +63,66 @@ sf::Color tile_indicator_colors[] =
 	sf::Color(0, 0, 0, 255),		// 7
 	sf::Color(59, 59, 59, 255),		// 8
 };
-
+// ===========================================
+// Funções de UI auxiliares
 bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape& rectangle)
 {
 	return rectangle.getGlobalBounds().contains(point);
 }
 
-void ui_text(const char* text_str, sf::Vector2f text_pos, UITextInfo text_info, bool text_centered)
+void ui_text(const UITextInfo& text_info, const sf::Vector2f& text_pos)
 {
-	ASSERT(text_info.font, "[UI:TEXT] Invalid font for rendering text");
+	ASSERT(text_info.font, "[UI:TEXT] Fonte invalida para renderizar texto.");
 	sf::Text text;
 	text.setFont(*text_info.font);
 	text.setFillColor(text_info.color);
 	text.setCharacterSize(text_info.pixel_size);
 	text.setStyle(text_info.style);
-	text.setString(text_str);
-
-	if (text_centered)
+	text.setString(text_info.text_str);
+	sf::Vector2f pos = text_pos;
+	if (text_info.centered)
 	{
 		sf::FloatRect text_bounds = text.getGlobalBounds();
-		sf::Vector2f center_offset = sf::Vector2f(text_bounds.width / 2.f, text_bounds.height / 2.f);
-		text.setPosition(text_pos - center_offset);
+		pos -= sf::Vector2f(text_bounds.width / 2.f, text_bounds.height / 2.f);
+		pos.y -= text_info.pixel_size / 4.f;
 	}
-	else
-	{
-		text.setPosition(text_pos);
-	}
+	text.setPosition(pos);
 
 	ui_state.window.draw(text);
 }
 
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info)
+void ui_sprite(const UISpriteInfo& sprite_info, const sf::Vector2f& sprite_pos)
+{
+	ASSERT(sprite_info.texture, "[UI:SPRITE] Textura invalida para renderizar sprite.");
+	sf::Sprite sprite;
+	sprite.setTexture(*sprite_info.texture);
+	sprite.setColor(sprite_info.color);
+	sprite.setScale(sprite_info.scale);
+	sf::Vector2f pos = sprite_pos;
+	if (sprite_info.centered)
+	{
+		sf::FloatRect sprite_rect = sprite.getGlobalBounds();
+		pos.x -= sprite_rect.width / 2.f;
+		pos.y -= sprite_rect.height / 2.f;
+	}
+	sprite.setPosition(pos);
+
+	ui_state.window.draw(sprite);
+}
+
+bool ui_button(const UIButtonInfo& button_info, const sf::Vector2f& button_pos, const sf::Vector2f& button_size)
 {
 	sf::RectangleShape button_rect;
 	sf::Vector2f button_center_pos = button_pos;
 	button_rect.setPosition(button_center_pos);
 	button_rect.setSize(button_size);
 	button_rect.setFillColor(button_info.color_standard);
-	button_rect.setOutlineThickness(button_info.use_outline ? button_info.outline_thickness : 0.f);
+	button_rect.setOutlineThickness(button_info.has_outline ? button_info.outline_thickness : 0.f);
 	button_rect.setOutlineColor(button_info.color_outline_standard);
 
+	// Interação com botão ao clicar com mouse esquerdo/direito
 	bool result = false;
-	if (button_info.interactable && is_on_rectangle(sf::Vector2f(ui_state.mouse.pos_x, ui_state.mouse.pos_y), button_rect))
+	if (button_info.is_interactable && is_on_rectangle(sf::Vector2f(ui_state.mouse.pos_x, ui_state.mouse.pos_y), button_rect))
 	{
 		button_rect.setFillColor(button_info.color_hovered);
 		button_rect.setOutlineColor(button_info.color_outline_hovered);
@@ -112,27 +136,22 @@ bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo b
 			result = true;
 		}
 	}
-
 	ui_state.window.draw(button_rect);
-	return result;
-}
 
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info, const char* text_str,
-	sf::Vector2f text_relative_pos, UITextInfo text_info, bool text_centered)
-{
-	// TODO_UI: Esses valores de posicionamento centralizado e não centralizado 
-	// não me parecem totalmente certos. Olhar depois...
-	bool result = ui_button(button_pos, button_size, button_info);
-	sf::Vector2f text_pos = button_pos;
-	if (text_centered)
+	if (button_info.has_text)
 	{
-		text_pos.x += button_size.x / 2.f;
-		text_pos.y += (button_size.y / 2.f) - (text_info.pixel_size / 4.f);
+		ui_text(button_info.text_info, button_pos + (button_size / 2.f));
 	}
-	ui_text(text_str, text_pos, text_info, text_centered);
+
+	if (button_info.has_sprite)
+	{
+		ui_sprite(button_info.sprite_info, button_pos + (button_size / 2.f));
+	}
+
 	return result;
 }
-
+// ===========================================
+// Funções de UI do jogo
 void ui_init()
 {
 	// Inicializando janela
@@ -209,6 +228,8 @@ void ui_render_board(Game* game, bool show_all)
 	UITextInfo tile_text_info;
 	tile_text_info.font = &ui_resources.font_default;
 	tile_text_info.style = sf::Text::Style::Bold;
+	tile_text_info.centered = true;
+	char tile_text_str[10];
 
 	if (game->difficulty == GameDifficulty::BEGINNER)
 	{
@@ -227,19 +248,52 @@ void ui_render_board(Game* game, bool show_all)
 		{
 			Tile& tile = board.grid[x][y];
 			bool tile_visible = tile.revealed || show_all;
-			UIButtonInfo& button_info = tile_visible ? ui_button_info_tile_revealed : ui_button_info_tile;
+			UIButtonInfo button_info = tile_visible ? ui_button_info_tile_revealed : ui_button_info_tile;
 			tile_text_info.color = sf::Color(0, 0, 0, 255);
-			char tile_label[10];
-			if (tile_visible && !tile.has_bomb && tile.adjacent_bombs > 0)
+
+			// Tiles de bomba: a bomba só é visível quando tile é revelado.
+			if (tile_visible && tile.has_bomb)
 			{
-				tile_text_info.color = tile_indicator_colors[tile.adjacent_bombs - 1];
-				sprintf(tile_label, "%d", tile.adjacent_bombs);
+				UISpriteInfo sprite_bomb;
+				sprite_bomb.texture = &ui_resources.texture_bomb;
+				sprite_bomb.color = sf::Color(0, 0, 0, 255);
+				sprite_bomb.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f);
+				sprite_bomb.centered = true;
+				button_info.has_sprite = true;
+				button_info.sprite_info = sprite_bomb;
+			}
+			// Tiles de bandeira: bandeira é visível apenas em tiles não revelados e marcados.
+			else if (!tile_visible && tile.has_flag)
+			{
+				UISpriteInfo sprite_flag;
+				sprite_flag.texture = &ui_resources.texture_flag;
+				sprite_flag.color = sf::Color(210, 0, 0, 255);
+				sprite_flag.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f);
+				sprite_flag.centered = true;
+				button_info.has_sprite = true;
+				button_info.sprite_info = sprite_flag;
 			}
 			else
 			{
-				sprintf(tile_label, " ");
+				button_info.has_sprite = false;
 			}
-			if (ui_button(tile_pos, tile_size, button_info, tile_label, sf::Vector2f(0, 0), tile_text_info, true))
+			
+			// Tiles comuns: caso estejam revelados, marcam seu número de bombas adjacentes no tile.
+			if (tile_visible && !tile.has_bomb && tile.adjacent_bombs > 0)
+			{
+				tile_text_info.color = tile_indicator_colors[tile.adjacent_bombs - 1];
+				sprintf(tile_text_str, "%d", tile.adjacent_bombs);
+				tile_text_info.text_str = tile_text_str;
+				button_info.has_text = true;
+				button_info.text_info = tile_text_info;
+			}
+			else
+			{
+				button_info.has_text = false;
+			}
+
+			// Interação com o determinado tile.
+			if (ui_button(button_info, tile_pos, tile_size))
 			{
 				if (ui_state.mouse.button_left.is_up)
 				{
@@ -249,34 +303,6 @@ void ui_render_board(Game* game, bool show_all)
 				{
 					game->action_toggle_flag(x, y);
 				}
-			}
-			if (tile_visible && tile.has_bomb)
-			{
-				sf::Sprite sprite_bomb;
-				sprite_bomb.setTexture(ui_resources.texture_bomb);
-				sprite_bomb.setColor(sf::Color(0, 0, 0, 255));
-				sprite_bomb.setScale(game->difficulty != GameDifficulty::EXPERT ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f));
-				sf::Vector2f sprite_pos = tile_pos;
-				sf::FloatRect sprite_rect = sprite_bomb.getGlobalBounds();
-				sprite_pos.x -= sprite_rect.width / 2.f;
-				sprite_pos.y -= sprite_rect.height / 2.f;
-				sprite_pos += tile_size / 2.f;
-				sprite_bomb.setPosition(sprite_pos);
-				ui_state.window.draw(sprite_bomb);
-			}
-			else if (!tile_visible && tile.has_flag)
-			{
-				sf::Sprite sprite_flag;
-				sprite_flag.setTexture(ui_resources.texture_flag);
-				sprite_flag.setColor(sf::Color(210, 0, 0, 255));
-				sprite_flag.setScale(game->difficulty != GameDifficulty::EXPERT ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f));
-				sf::Vector2f sprite_pos = tile_pos;
-				sf::FloatRect sprite_rect = sprite_flag.getGlobalBounds();
-				sprite_pos.x -= sprite_rect.width / 2.f;
-				sprite_pos.y -= sprite_rect.height / 2.f;
-				sprite_pos += tile_size / 2.f;
-				sprite_flag.setPosition(sprite_pos);
-				ui_state.window.draw(sprite_flag);
 			}
 
 			tile_pos.x += tile_size.x;
@@ -292,6 +318,7 @@ void ui_render_game(Game* game)
 	{
 	case GameState::STARTING:
 	{
+		// Tela inicial do jogo, com nome do jogo e seleção de modo de jogo.
 		ui_state.window.setSize(sf::Vector2u(APP_DEFAULT_WIDTH, APP_DEFAULT_HEIGHT));
 		sf::FloatRect ui_view_rect = sf::FloatRect(0, 0, APP_DEFAULT_WIDTH, APP_DEFAULT_HEIGHT);
 		ui_state.window.setView(sf::View(ui_view_rect));
@@ -303,27 +330,38 @@ void ui_render_game(Game* game)
 		text_info.color = sf::Color(0, 0, 0, 255);
 		text_info.pixel_size = 48;
 		text_info.style = sf::Text::Style::Bold;
-		ui_text("Campo Minado", panel_position, text_info);
+		text_info.text_str = "Campo Minado";
+		ui_text(text_info, panel_position);
 
 		panel_position.y += 100;
 		text_info.pixel_size = 32;
 		text_info.style = sf::Text::Style::Regular;
-		ui_text("Novo jogo:", panel_position, text_info);
+		text_info.text_str = "Novo jogo:";
+		ui_text(text_info, panel_position);
 
 		panel_position.x += 20;
 		panel_position.y += 65;
 		sf::Vector2f button_size = sf::Vector2f(350, 50);
-		if (ui_button(panel_position, button_size, ui_button_info_default, "Iniciante", sf::Vector2f(0, 0), text_info, true))
+		text_info.centered = true;
+		text_info.text_str = "Iniciante";
+		UIButtonInfo button_info = ui_button_info_default;
+		button_info.has_text = true;
+		button_info.text_info = text_info;
+		if (ui_button(button_info, panel_position, button_size))
 		{
 			game->start(GameDifficulty::BEGINNER);
 		}
 		panel_position.y += 80;
-		if(ui_button(panel_position, button_size, ui_button_info_default, "Intermediário", sf::Vector2f(0, 0), text_info, true))
+		text_info.text_str = "Intermediário";
+		button_info.text_info = text_info;
+		if(ui_button(button_info, panel_position, button_size))
 		{
 			game->start(GameDifficulty::INTERMEDIATE);
 		}
 		panel_position.y += 80;
-		if (ui_button(panel_position, button_size, ui_button_info_default, "Expert", sf::Vector2f(0, 0), text_info, true))
+		text_info.text_str = "Expert";
+		button_info.text_info = text_info;
+		if (ui_button(button_info, panel_position, button_size))
 		{
 			game->start(GameDifficulty::EXPERT);
 			ui_state.window.setSize(sf::Vector2u(APP_EXPANDED_WIDTH, APP_DEFAULT_HEIGHT));
@@ -334,10 +372,12 @@ void ui_render_game(Game* game)
 	} break;
 	case GameState::PLAYING:
 	{
+		// Jogo corrente. Renderiza o tabuleiro inteiro.
 		ui_render_board(game);
 	} break;
 	case GameState::ENDED:
 	{
+		// Jogo após finalizar. Renderiza o tabuleiro inteiro e texto de vitória/derrota.
 		ui_render_board(game, true);
 
 		sf::Vector2f panel_position = sf::Vector2f(30, APP_DEFAULT_HEIGHT - 45);
@@ -346,7 +386,8 @@ void ui_render_game(Game* game)
 		text_info.color = game->is_won() ? sf::Color(0, 220, 30, 255) : sf::Color(220, 0, 30, 255);
 		text_info.pixel_size = 24;
 		text_info.style = sf::Text::Style::Bold;
-		ui_text(game->is_won() ? "Você ganhou!" : "Você perdeu...", panel_position, text_info);
+		text_info.text_str = game->is_won() ? "Você ganhou!" : "Você perdeu...";
+		ui_text(text_info, panel_position);
 
 		if (game->difficulty == GameDifficulty::EXPERT)
 		{
@@ -361,8 +402,12 @@ void ui_render_game(Game* game)
 		panel_position.x -= button_size.x + 20;
 		panel_position.y += 5;
 		text_info.color = sf::Color(0, 0, 0, 255);
-		if (ui_button(panel_position, button_size, ui_button_info_default,
-			"Reiniciar", sf::Vector2f(0, 0), text_info, true))
+		text_info.text_str = "Reiniciar";
+		text_info.centered = true;
+		UIButtonInfo button_info = ui_button_info_default;
+		button_info.has_text = true;
+		button_info.text_info = text_info;
+		if (ui_button(button_info, panel_position, button_size))
 		{
 			game->reset();
 		}

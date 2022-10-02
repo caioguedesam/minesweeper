@@ -1,11 +1,6 @@
 #pragma once
 #include "game.h"
-
 #include <SFML/Graphics.hpp>
-
-/*
-	TODO: Immediate mode GUI version
-*/
 
 struct MouseButton
 {
@@ -24,32 +19,47 @@ struct MouseState
 
 bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape& rectangle);
 
+struct UITextInfo
+{
+	const char* text_str = nullptr;
+	sf::Font* font = nullptr;
+	sf::Color color = sf::Color(0, 0, 0, 255);
+	sf::Text::Style style = sf::Text::Style::Regular;
+	int pixel_size = 0;
+	bool centered = false;
+};
+
+struct UISpriteInfo
+{
+	sf::Texture* texture = nullptr;
+	sf::Color color;
+	sf::Vector2f scale = sf::Vector2f(1, 1);
+	bool centered = false;
+};
+
 struct UIButtonInfo
 {
-	bool interactable = true;
+	bool is_interactable = true;
 	sf::Color color_standard;
 	sf::Color color_hovered;
 	sf::Color color_pressed;
 	
-	bool use_outline = false;
+	bool has_outline = false;
 	float outline_thickness = 0.f;
 	sf::Color color_outline_standard;
 	sf::Color color_outline_hovered;
 	sf::Color color_outline_pressed;
+
+	bool has_text = false;
+	UITextInfo text_info;
+
+	bool has_sprite = false;
+	UISpriteInfo sprite_info;
 };
 
-struct UITextInfo
-{
-	sf::Font* font = nullptr;
-	sf::Color color;
-	int pixel_size = 0;
-	sf::Text::Style style;
-};
-
-void ui_text(const char* text_str, sf::Vector2f text_pos, UITextInfo text_info, bool text_centered = false);
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info);
-bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo button_info, const char* text_str,
-	sf::Vector2f text_relative_pos, UITextInfo text_info, bool text_centered = false);
+void ui_text(const UITextInfo& text_info, const sf::Vector2f& text_pos);
+void ui_sprite(const UISpriteInfo& sprite_info, const sf::Vector2f& sprite_pos);
+bool ui_button(const UIButtonInfo& button_info, const sf::Vector2f& button_pos, const sf::Vector2f& button_size);
 
 struct UIState
 {
