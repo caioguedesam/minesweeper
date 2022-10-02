@@ -57,6 +57,18 @@ UIButtonInfo ui_button_info_tile_revealed =
 	false,
 };
 
+sf::Color tile_indicator_colors[] =
+{
+	sf::Color(17, 20, 94, 255),		// 1
+	sf::Color(30, 128, 28, 255),	// 2
+	sf::Color(156, 10, 8, 255),		// 3
+	sf::Color(50, 14, 105, 255),	// 4
+	sf::Color(51, 27, 18, 255),		// 5
+	sf::Color(42, 94, 74, 255),		// 6
+	sf::Color(0, 0, 0, 255),		// 7
+	sf::Color(59, 59, 59, 255),		// 8
+};
+
 bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape & rectangle)
 {
 	sf::Vector2f rectangle_pos = rectangle.getPosition();
@@ -245,6 +257,7 @@ void ui_render_board(Game* game, bool show_all)
 			}
 			else if (tile_visible && tile.adjacent_bombs > 0)
 			{
+				tile_text_info.color = tile_indicator_colors[tile.adjacent_bombs - 1];
 				sprintf(tile_label, "%d", tile.adjacent_bombs);
 			}
 			else if (!tile_visible && tile.has_flag)
