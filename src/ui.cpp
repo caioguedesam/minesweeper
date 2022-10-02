@@ -54,11 +54,7 @@ UIButtonInfo ui_button_info_tile_revealed =
 	sf::Color(150, 150, 150, 255),
 	sf::Color(150, 150, 150, 255),
 	sf::Color(82, 82, 82, 255),
-	true,
-	1.f,
-	sf::Color(150, 150, 150, 255),
-	sf::Color(82, 82, 82, 255),
-	sf::Color(82, 82, 82, 255),
+	false,
 };
 
 bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape & rectangle)
@@ -118,12 +114,12 @@ bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo b
 	{
 		button_rect.setFillColor(button_info.color_hovered);
 		button_rect.setOutlineColor(button_info.color_outline_hovered);
-		if (ui_state.mouse.is_pressed)
+		if (ui_state.mouse.button_left.is_pressed)
 		{
 			button_rect.setFillColor(button_info.color_pressed);
 			button_rect.setOutlineColor(button_info.color_outline_pressed);
 		}
-		if (ui_state.mouse.is_up)
+		if (ui_state.mouse.button_left.is_up || ui_state.mouse.button_right.is_up)
 		{
 			result = true;
 		}
@@ -162,57 +158,32 @@ void ui_init()
 	ASSERT_FORMAT(result, "[UI:RESOURCE] Failed to load font from file %s", default_font_path);
 }
 
+void ui_update_mouse_button_state(bool new_pressed, MouseButton* button)
+{
+	if (button->is_down) button->is_down = false;
+	else if (!button->is_pressed && new_pressed)
+	{
+		button->is_down = true;
+	}
+
+	if (button->is_up) button->is_up = false;
+	else if (button->is_pressed && !new_pressed)
+	{
+		button->is_up = true;
+	}
+
+	button->is_pressed = new_pressed;
+}
+
 void ui_poll_input(Game* game)
 {
-	////fflush(stdout);
-	//switch (game->state)
-	//{
-	//case GameState::STARTING:
-	//{
-	//	int input_difficulty = 0;
-	//	while (input_difficulty <= 0 || input_difficulty > 3)
-	//	{
-	//		scanf(" %d", &input_difficulty);
-	//	}
-	//	game->start((GameDifficulty)input_difficulty);
-	//} break;
-	//case GameState::PLAYING:
-	//{
-	//	int x = -1;
-	//	int y = -1;
-	//	while (!game->board.is_on_bounds(x, y))
-	//	{
-	//		scanf(" %d %d", &x, &y);
-	//	}
-	//	game->process_action(GameAction::REVEAL_TILE, x, y);
-	//} break;
-	//case GameState::ENDED:
-	//{
-	//	getchar();
-	//	getchar();
-	//	game->reset();
-	//} break;
-	//default: break;
-	//}
-
 	// Mouse data
 	MouseState& mouse = ui_state.mouse;
 	sf::Vector2i mouse_pos = sf::Mouse::getPosition(ui_state.window);
 	mouse.pos_x = mouse_pos.x;
 	mouse.pos_y = mouse_pos.y;
-	bool mouse_pressed = sf::Mouse::isButtonPressed(sf::Mouse::Button::Left);
-	
-	if (mouse.is_down) mouse.is_down = false;
-	else if(!mouse.is_pressed && mouse_pressed)
-	{
-		mouse.is_down = true;
-	}
-	if (mouse.is_up) mouse.is_up = false;
-	else if (mouse.is_pressed && !mouse_pressed)
-	{
-		mouse.is_up = true;
-	}
-	mouse.is_pressed = mouse_pressed;
+	ui_update_mouse_button_state(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left), &mouse.button_left);
+	ui_update_mouse_button_state(sf::Mouse::isButtonPressed(sf::Mouse::Button::Right), &mouse.button_right);
 
 	// Window events
 	sf::Window& window = ui_state.window;
@@ -287,7 +258,14 @@ void ui_render_board(Game* game, bool show_all)
 			}
 			if (ui_button(tile_pos, tile_size, button_info, tile_label, sf::Vector2f(0, 0), tile_text_info, true))
 			{
-				game->process_action(GameAction::REVEAL_TILE, x, y);
+				if (ui_state.mouse.button_left.is_up)
+				{
+					game->process_action(GameAction::REVEAL_TILE, x, y);
+				}
+				else
+				{
+					game->process_action(GameAction::TOGGLE_FLAG, x, y);
+				}
 			}
 
 			tile_pos.x += tile_size.x;

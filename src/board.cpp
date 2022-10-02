@@ -63,7 +63,7 @@ void Board::init(int w, int h, int bombs)
 
 bool Board::is_on_win_state()
 {
-	return revealed_tiles == (width * height) - bomb_count;
+	return !revealed_bomb && revealed_tiles == (width * height) - bomb_count;
 }
 
 bool Board::is_on_lose_state()

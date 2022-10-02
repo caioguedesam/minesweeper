@@ -7,13 +7,19 @@
 	TODO: Immediate mode GUI version
 */
 
+struct MouseButton
+{
+	bool is_down = false;
+	bool is_pressed = false;
+	bool is_up = false;
+};
+
 struct MouseState
 {
 	int pos_x		= 0;
 	int pos_y		= 0;
-	bool is_down	= false;
-	bool is_pressed = false;
-	bool is_up		= false;
+	MouseButton button_left;
+	MouseButton button_right;
 };
 
 bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape& rectangle);
@@ -59,6 +65,7 @@ struct UIResources
 };
 
 void ui_init();
+void ui_update_mouse_button_state(bool new_pressed, MouseButton* button);
 void ui_poll_input(Game* game);
 void ui_clear();
 void ui_render_board(Game* game, bool show_all = false);
