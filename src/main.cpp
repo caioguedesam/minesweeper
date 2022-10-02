@@ -14,6 +14,8 @@ O código do jogo segue uma arquitetura de três níveis, cada uma se comunicando c
     > Os dados de um tabuleiro de jogo e armazena o grid de tiles.
     > Expõe consultas para verificar o estado do tabuleiro, como por exemplo descobrir quantas bombas tem adjacentes a um tile.
 
+Dependências utilizadas:
+> SFML (gerenciamento de janela, eventos e gráficos): https://www.sfml-dev.org/
 Créditos:
 > Ícones feitos por Lorc. Disponíveis em: https://game-icons.net.
 
