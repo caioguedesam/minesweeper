@@ -61,7 +61,8 @@ struct UIState
 struct UIResources
 {
 	sf::Font font_default;
-	// TODO: Add default sprites (bomb, flag, etc.)
+	sf::Texture texture_bomb;
+	sf::Texture texture_flag;
 };
 
 void ui_init();

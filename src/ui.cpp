@@ -165,9 +165,12 @@ void ui_init()
 	ui_state.color_background = sf::Color(255, 255, 255, 255);
 
 	// Load default resources
-	const char* default_font_path = "resources/fonts/Kenney Future Narrow.ttf";
-	bool result = ui_resources.font_default.loadFromFile(default_font_path);
-	ASSERT_FORMAT(result, "[UI:RESOURCE] Failed to load font from file %s", default_font_path);
+	bool result = ui_resources.font_default.loadFromFile("resources/fonts/Kenney Future Narrow.ttf");
+	ASSERT(result, "[UI:RESOURCE] Failed to load default font.");
+	result = ui_resources.texture_bomb.loadFromFile("resources/textures/skull.png");
+	ASSERT(result, "[UI:RESOURCE] Failed to load bomb texture.");
+	result = ui_resources.texture_flag.loadFromFile("resources/textures/flag.png");
+	ASSERT(result, "[UI:RESOURCE] Failed to load flag texture.");
 }
 
 void ui_update_mouse_button_state(bool new_pressed, MouseButton* button)
@@ -250,20 +253,10 @@ void ui_render_board(Game* game, bool show_all)
 			UIButtonInfo& button_info = tile_visible ? ui_button_info_tile_revealed : ui_button_info_tile;
 			tile_text_info.color = sf::Color(0, 0, 0, 255);
 			char tile_label[10];
-			if (tile_visible && tile.has_bomb)
-			{
-				sprintf(tile_label, "B");
-				tile_text_info.color = sf::Color(255, 0, 0, 255);
-			}
-			else if (tile_visible && tile.adjacent_bombs > 0)
+			if (tile_visible && !tile.has_bomb && !tile.has_flag && tile.adjacent_bombs > 0)
 			{
 				tile_text_info.color = tile_indicator_colors[tile.adjacent_bombs - 1];
 				sprintf(tile_label, "%d", tile.adjacent_bombs);
-			}
-			else if (!tile_visible && tile.has_flag)
-			{
-				sprintf(tile_label, "F");
-				tile_text_info.color = sf::Color(0, 0, 255, 255);
 			}
 			else
 			{
@@ -279,6 +272,34 @@ void ui_render_board(Game* game, bool show_all)
 				{
 					game->process_action(GameAction::TOGGLE_FLAG, x, y);
 				}
+			}
+			if (tile_visible && tile.has_bomb)
+			{
+				sf::Sprite sprite_bomb;
+				sprite_bomb.setTexture(ui_resources.texture_bomb);
+				sprite_bomb.setColor(sf::Color(0, 0, 0, 255));
+				sprite_bomb.setScale(game->difficulty != GameDifficulty::EXPERT ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f));
+				sf::Vector2f sprite_pos = tile_pos;
+				sf::FloatRect sprite_rect = sprite_bomb.getGlobalBounds();
+				sprite_pos.x -= sprite_rect.width / 2.f;
+				sprite_pos.y -= sprite_rect.height / 2.f;
+				sprite_pos += tile_size / 2.f;
+				sprite_bomb.setPosition(sprite_pos);
+				ui_state.window.draw(sprite_bomb);
+			}
+			else if (!tile_visible && tile.has_flag)
+			{
+				sf::Sprite sprite_flag;
+				sprite_flag.setTexture(ui_resources.texture_flag);
+				sprite_flag.setColor(sf::Color(210, 0, 0, 255));
+				sprite_flag.setScale(game->difficulty != GameDifficulty::EXPERT ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f));
+				sf::Vector2f sprite_pos = tile_pos;
+				sf::FloatRect sprite_rect = sprite_flag.getGlobalBounds();
+				sprite_pos.x -= sprite_rect.width / 2.f;
+				sprite_pos.y -= sprite_rect.height / 2.f;
+				sprite_pos += tile_size / 2.f;
+				sprite_flag.setPosition(sprite_pos);
+				ui_state.window.draw(sprite_flag);
 			}
 
 			tile_pos.x += tile_size.x;
