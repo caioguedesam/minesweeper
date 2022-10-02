@@ -163,9 +163,9 @@ void ui_init()
 	// Carregando recursos do jogo
 	bool result = ui_resources.font_default.loadFromFile("resources/fonts/Kenney Future Narrow.ttf");
 	ASSERT(result, "[UI:RESOURCE] Failed to load default font.");
-	result = ui_resources.texture_bomb.loadFromFile("resources/textures/skull.png");
+	result = ui_resources.texture_bomb.loadFromFile("resources/textures/mine-explosion.png");
 	ASSERT(result, "[UI:RESOURCE] Failed to load bomb texture.");
-	result = ui_resources.texture_flag.loadFromFile("resources/textures/flag.png");
+	result = ui_resources.texture_flag.loadFromFile("resources/textures/flying-flag.png");
 	ASSERT(result, "[UI:RESOURCE] Failed to load flag texture.");
 }
 
@@ -256,8 +256,8 @@ void ui_render_board(Game* game, bool show_all)
 			{
 				UISpriteInfo sprite_bomb;
 				sprite_bomb.texture = &ui_resources.texture_bomb;
-				sprite_bomb.color = sf::Color(0, 0, 0, 255);
-				sprite_bomb.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f);
+				sprite_bomb.color = sf::Color(255, 100, 0, 255);
+				sprite_bomb.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.085f, .085f) : sf::Vector2f(.025f, .025f);
 				sprite_bomb.centered = true;
 				button_info.has_sprite = true;
 				button_info.sprite_info = sprite_bomb;
@@ -267,8 +267,8 @@ void ui_render_board(Game* game, bool show_all)
 			{
 				UISpriteInfo sprite_flag;
 				sprite_flag.texture = &ui_resources.texture_flag;
-				sprite_flag.color = sf::Color(210, 0, 0, 255);
-				sprite_flag.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.5f, .5f) : sf::Vector2f(.25f, .25f);
+				sprite_flag.color = sf::Color(168, 0, 0, 255);
+				sprite_flag.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.085f, .085f) : sf::Vector2f(.025f, .025f);
 				sprite_flag.centered = true;
 				button_info.has_sprite = true;
 				button_info.sprite_info = sprite_flag;
