@@ -348,19 +348,19 @@ void ui_render_game(Game* game)
 	} break;
 	case GameState::ENDED:
 	{
-		CLI_PRINTLN("============== FIM DE JOGO! ==============");
-		if (game->is_won())
-		{
-			CLI_PRINTLN("		Você GANHOU!");
-		}
-		else
-		{
-			CLI_PRINTLN("		Você PERDEU...");
-		}
-		CLI_PRINTLN("==========================================");
+		//CLI_PRINTLN("============== FIM DE JOGO! ==============");
+		//if (game->is_won())
+		//{
+		//	CLI_PRINTLN("		Você GANHOU!");
+		//}
+		//else
+		//{
+		//	CLI_PRINTLN("		Você PERDEU...");
+		//}
+		//CLI_PRINTLN("==========================================");
 		ui_render_board(game, true);
-		CLI_PRINTLN("==========================================");
-		CLI_PRINTLN("		Pressione Enter para comecar um novo jogo:");
+		//CLI_PRINTLN("==========================================");
+		//CLI_PRINTLN("		Pressione Enter para comecar um novo jogo:");
 	} break;
 	default: break;
 	}

@@ -1,6 +1,5 @@
 #include "board.h"
 #include "random.h"
-#include <stdio.h>
 #include <string.h>
 
 void Tile::reset()
@@ -37,13 +36,12 @@ void Board::init(int w, int h, int bombs)
 	// Simples amostragem aleatória com white noise para colocação de bombas
 	while (bombs)
 	{
-		int x = dist_uniform(0, height + 1);
-		int y = dist_uniform(0, width + 1);
+		int x = dist_uniform(0, height);
+		int y = dist_uniform(0, width);
 		Tile& tile = grid[x][y];
 		if (!tile.has_bomb)
 		{
 			tile.has_bomb = true;
-			//printf("placed bomb at %d %d\n", x, y);
 			bombs--;
 		}
 	}
