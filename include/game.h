@@ -15,12 +15,6 @@ enum class GameDifficulty
 	EXPERT			= 3,
 };
 
-enum class GameAction
-{
-	REVEAL_TILE,
-	TOGGLE_FLAG,
-};
-
 struct Game
 {
 	bool is_running = true;
@@ -32,8 +26,11 @@ struct Game
 
 	void reset();								// ENDED	-> STARTING
 	void start(GameDifficulty new_difficulty);	// STARTING -> PLAYING
-	void process_action(GameAction action, int x, int y);
 	void check_end_condition();					// PLAYING	-> ENDED
 
+	void action_reveal_tile(int x, int y);
+	void action_toggle_flag(int x, int y);
+
 	bool is_won();
+	void exit();
 };

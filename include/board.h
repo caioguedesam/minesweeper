@@ -1,5 +1,4 @@
 #pragma once
-#include <stdint.h>
 
 #define BOARD_MAX_WIDTH		30
 #define BOARD_MAX_HEIGHT	16
@@ -24,14 +23,11 @@ struct Board
 	bool revealed_bomb = false;
 
 	void init(int w, int h, int bombs);
-
 	void clear();
+
+	bool is_on_bounds(int x, int y);
 	bool is_on_win_state();
 	bool is_on_lose_state();
 
-	bool is_on_bounds(int x, int y);
-
-	void reveal_tile(int x, int y);
 	int get_adjacent_bombs(int x, int y);
-	void toggle_flag(int x, int y);
 };

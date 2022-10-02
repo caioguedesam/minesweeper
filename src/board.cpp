@@ -76,33 +76,6 @@ bool Board::is_on_bounds(int x, int y)
 	return x >= 0 && y >= 0 && x < height && y < width;
 }
 
-void Board::reveal_tile(int x, int y)
-{
-	if (!is_on_bounds(x, y)) return;
-
-	Tile& tile = grid[x][y];
-	if (tile.revealed) return;
-
-	tile.revealed = true;
-	revealed_tiles++;
-	if (tile.has_bomb)
-	{
-		revealed_bomb = true;
-		return;	// kaboom
-	}
-	
-	if (get_adjacent_bombs(x, y) == 0)
-	{
-		for (int i = -1; i <= 1; i++)
-		{
-			for (int j = -1; j <= 1; j++)
-			{
-				reveal_tile(x + i, y + j);
-			}
-		}
-	}
-}
-
 int Board::get_adjacent_bombs(int x, int y)
 {
 	if (!is_on_bounds(x, y)) return -1;
@@ -124,10 +97,4 @@ int Board::get_adjacent_bombs(int x, int y)
 		}
 	}
 	return bomb_count;
-}
-
-void Board::toggle_flag(int x, int y)
-{
-	if (!is_on_bounds(x, y)) return;
-	grid[x][y].has_flag = !grid[x][y].has_flag;
 }

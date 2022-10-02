@@ -11,17 +11,6 @@
 #define APP_EXPANDED_WIDTH      800
 #define APP_DEFAULT_HEIGHT      480
 
-#define CLI_PRINT(MSG, ...)\
-do {\
-	printf(MSG, __VA_ARGS__);\
-} while(false)
-
-#define CLI_PRINTLN(MSG, ...)\
-do {\
-	printf(MSG, __VA_ARGS__);\
-	printf("\n");\
-} while(false)
-
 UIState ui_state;
 UIResources ui_resources;
 UIButtonInfo ui_button_info_default =
@@ -69,22 +58,9 @@ sf::Color tile_indicator_colors[] =
 	sf::Color(59, 59, 59, 255),		// 8
 };
 
-bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape & rectangle)
+bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape& rectangle)
 {
-	sf::Vector2f rectangle_pos = rectangle.getPosition();
-	sf::Vector2f rectangle_size = rectangle.getSize();
-	sf::Vector2f rectangle_min =
-	{
-		rectangle_pos.x,
-		rectangle_pos.y,
-	};
-	sf::Vector2f rectangle_max =
-	{
-		rectangle_pos.x + rectangle_size.x,
-		rectangle_pos.y + rectangle_size.y,
-	};
-	return point.x >= rectangle_min.x && point.x <= rectangle_max.x
-		&& point.y >= rectangle_min.y && point.y <= rectangle_max.y;
+	return rectangle.getGlobalBounds().contains(point);
 }
 
 void ui_text(const char* text_str, sf::Vector2f text_pos, UITextInfo text_info, bool text_centered)
@@ -159,12 +135,13 @@ bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo b
 
 void ui_init()
 {
+	// Inicializando janela
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 	ui_state.window.create(sf::VideoMode(APP_DEFAULT_WIDTH, APP_DEFAULT_HEIGHT), APP_NAME, sf::Style::Titlebar | sf::Style::Close, settings);
 	ui_state.color_background = sf::Color(255, 255, 255, 255);
 
-	// Load default resources
+	// Carregando recursos do jogo
 	bool result = ui_resources.font_default.loadFromFile("resources/fonts/Kenney Future Narrow.ttf");
 	ASSERT(result, "[UI:RESOURCE] Failed to load default font.");
 	result = ui_resources.texture_bomb.loadFromFile("resources/textures/skull.png");
@@ -192,7 +169,7 @@ void ui_update_mouse_button_state(bool new_pressed, MouseButton* button)
 
 void ui_poll_input(Game* game)
 {
-	// Mouse data
+	// Estado atual do mouse
 	MouseState& mouse = ui_state.mouse;
 	sf::Vector2i mouse_pos = sf::Mouse::getPosition(ui_state.window);
 	mouse.pos_x = mouse_pos.x;
@@ -200,7 +177,7 @@ void ui_poll_input(Game* game)
 	ui_update_mouse_button_state(sf::Mouse::isButtonPressed(sf::Mouse::Button::Left), &mouse.button_left);
 	ui_update_mouse_button_state(sf::Mouse::isButtonPressed(sf::Mouse::Button::Right), &mouse.button_right);
 
-	// Window events
+	// Eventos de janela
 	sf::Window& window = ui_state.window;
 	sf::Event event;
 	while (window.pollEvent(event))
@@ -209,7 +186,7 @@ void ui_poll_input(Game* game)
 		{
 		case sf::Event::Closed:
 			window.close();
-			game->is_running = false;
+			game->exit();
 			break;
 		default:
 			break;
@@ -266,11 +243,11 @@ void ui_render_board(Game* game, bool show_all)
 			{
 				if (ui_state.mouse.button_left.is_up)
 				{
-					game->process_action(GameAction::REVEAL_TILE, x, y);
+					game->action_reveal_tile(x, y);
 				}
 				else
 				{
-					game->process_action(GameAction::TOGGLE_FLAG, x, y);
+					game->action_toggle_flag(x, y);
 				}
 			}
 			if (tile_visible && tile.has_bomb)

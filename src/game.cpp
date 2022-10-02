@@ -32,24 +32,6 @@ void Game::start(GameDifficulty new_difficulty)
 	state = GameState::PLAYING;
 }
 
-void Game::process_action(GameAction action, int x, int y)
-{
-	if (state != GameState::PLAYING) return;
-
-	switch (action)
-	{
-	case GameAction::REVEAL_TILE:
-	{
-		board.reveal_tile(x, y);
-	} break;
-	case GameAction::TOGGLE_FLAG:
-	{
-		board.toggle_flag(x, y);
-	} break;
-	default: break;
-	}
-}
-
 void Game::check_end_condition()
 {
 	if (state != GameState::PLAYING) return;
@@ -65,7 +47,47 @@ void Game::check_end_condition()
 	}
 }
 
+void Game::action_reveal_tile(int x, int y)
+{
+	if (state != GameState::PLAYING || !board.is_on_bounds(x, y)) return;
+
+	Tile& tile = board.grid[x][y];
+	if (tile.revealed) return;
+
+	tile.revealed = true;
+	board.revealed_tiles++;
+	if (tile.has_bomb)
+	{
+		board.revealed_bomb = true;
+		return;	// kaboom!
+	}
+
+	if (board.get_adjacent_bombs(x, y) == 0)
+	{
+		for (int i = -1; i <= 1; i++)
+		{
+			for (int j = -1; j <= 1; j++)
+			{
+				action_reveal_tile(x + i, y + j);
+			}
+		}
+	}
+}
+
+void Game::action_toggle_flag(int x, int y)
+{
+	if (state != GameState::PLAYING) return;
+
+	if (!board.is_on_bounds(x, y)) return;
+	board.grid[x][y].has_flag = !board.grid[x][y].has_flag;
+}
+
 bool Game::is_won()
 {
 	return won_game;
+}
+
+void Game::exit()
+{
+	is_running = false;
 }
