@@ -4,10 +4,11 @@
 
 void Tile::reset()
 {
-	revealed = false;
-	has_bomb = false;
-	has_flag = false;
-	adjacent_bombs = -1;
+	revealed		= false;
+	has_bomb		= false;
+	has_flag		= false;
+	has_radar		= false;
+	adjacent_bombs	= -1;
 }
 
 void Board::clear()
@@ -19,6 +20,7 @@ void Board::clear()
 			grid[i][j].reset();
 		}
 	}
+	memset(bomb_locations, 0, sizeof(bomb_locations));
 	width = 0;
 	height = 0;
 	bomb_count = 0;
@@ -42,21 +44,36 @@ void Board::init(int w, int h, int bombs)
 		if (!tile.has_bomb)
 		{
 			tile.has_bomb = true;
+			bomb_locations[bombs - 1][0] = x;
+			bomb_locations[bombs - 1][1] = y;
 			bombs--;
 		}
 	}
 
 	// Fazendo cache de bombas adjacentes por tile para eliminar checagens redundantes
-	for (int i = 0; i < height; i++)
+	for (int x = 0; x < height; x++)
 	{
-		for (int j = 0; j < width; j++)
+		for (int y = 0; y < width; y++)
 		{
-			Tile& tile = grid[i][j];
-			int adj_bombs = get_adjacent_bombs(i, j);
+			Tile& tile = grid[x][y];
+			int adj_bombs = get_adjacent_bombs(x, y);
 			if (adj_bombs >= 0)
 			{
 				tile.adjacent_bombs = adj_bombs;
 			}
+		}
+	}
+
+	// Colocando um radar como bônus para o jogador em posição vazia aleatória.
+	while (true)
+	{
+		int x = dist_uniform(0, height);
+		int y = dist_uniform(0, width);
+		Tile& tile = grid[x][y];
+		if (!tile.has_bomb && get_adjacent_bombs(x, y) == 0)
+		{
+			tile.has_radar = true;
+			break;
 		}
 	}
 }

@@ -1,3 +1,4 @@
+#include "random.h"
 #include "game.h"
 
 void Game::reset()
@@ -60,6 +61,39 @@ void Game::action_reveal_tile(int x, int y)
 	{
 		board.revealed_bomb = true;
 		return;	// kaboom!
+	}
+	if (tile.has_radar)
+	{
+		int bombs_to_reveal = 0;
+		switch (difficulty)
+		{
+		case GameDifficulty::BEGINNER:
+		{
+			bombs_to_reveal = 2;
+		} break;
+		case GameDifficulty::INTERMEDIATE:
+		{
+			bombs_to_reveal = 4;
+		} break;
+		case GameDifficulty::EXPERT:
+		{
+			bombs_to_reveal = 6;
+		} break;
+		default: break;
+		}
+
+		while (bombs_to_reveal)
+		{
+			int bomb_index = dist_uniform(0, board.bomb_count);
+			int bomb_x = board.bomb_locations[bomb_index][0];
+			int bomb_y = board.bomb_locations[bomb_index][1];
+			Tile& tile = board.grid[bomb_x][bomb_y];
+			if (!tile.revealed)
+			{
+				tile.revealed = true;
+				bombs_to_reveal--;
+			}
+		}
 	}
 
 	if (board.get_adjacent_bombs(x, y) == 0)

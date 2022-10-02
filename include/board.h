@@ -2,25 +2,28 @@
 
 #define BOARD_MAX_WIDTH		30
 #define BOARD_MAX_HEIGHT	16
+#define BOARD_MAX_BOMBS		99
 
 struct Tile
 {
-	bool revealed = false;
-	bool has_bomb = false;
-	bool has_flag = false;
-	int adjacent_bombs = -1;
+	bool revealed		= false;
+	bool has_bomb		= false;
+	bool has_flag		= false;
+	bool has_radar		= false;
+	int adjacent_bombs	= -1;
 
 	void reset();
 };
 
 struct Board
 {
-	int width = 0;
-	int height = 0;
+	int width			= 0;
+	int height			= 0;
 	Tile grid[BOARD_MAX_HEIGHT][BOARD_MAX_WIDTH];
-	int bomb_count = 0;
-	int revealed_tiles = 0;
-	bool revealed_bomb = false;
+	int bomb_locations[BOARD_MAX_BOMBS][2];
+	int bomb_count		= 0;
+	int revealed_tiles	= 0;
+	bool revealed_bomb	= false;
 
 	void init(int w, int h, int bombs);
 	void clear();

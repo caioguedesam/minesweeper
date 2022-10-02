@@ -73,6 +73,7 @@ struct UIResources
 	sf::Font font_default;
 	sf::Texture texture_bomb;
 	sf::Texture texture_flag;
+	sf::Texture texture_radar;
 };
 
 void ui_init();

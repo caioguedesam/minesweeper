@@ -162,11 +162,13 @@ void ui_init()
 
 	// Carregando recursos do jogo
 	bool result = ui_resources.font_default.loadFromFile("resources/fonts/Kenney Future Narrow.ttf");
-	ASSERT(result, "[UI:RESOURCE] Failed to load default font.");
+	ASSERT(result, "[UI:RESOURCE] Falha no carregamento da fonte padrão.");
 	result = ui_resources.texture_bomb.loadFromFile("resources/textures/mine-explosion.png");
-	ASSERT(result, "[UI:RESOURCE] Failed to load bomb texture.");
+	ASSERT(result, "[UI:RESOURCE] Falha ao carregar textura de mina.");
 	result = ui_resources.texture_flag.loadFromFile("resources/textures/flying-flag.png");
-	ASSERT(result, "[UI:RESOURCE] Failed to load flag texture.");
+	ASSERT(result, "[UI:RESOURCE] Falha ao carregar textura de bandeira.");
+	result = ui_resources.texture_radar.loadFromFile("resources/textures/radar-sweep.png");
+	ASSERT(result, "[UI:RESOURCE] Falha ao carregar textura de radar.");
 }
 
 void ui_update_mouse_button_state(bool new_pressed, MouseButton* button)
@@ -257,10 +259,20 @@ void ui_render_board(Game* game, bool show_all)
 				UISpriteInfo sprite_bomb;
 				sprite_bomb.texture = &ui_resources.texture_bomb;
 				sprite_bomb.color = sf::Color(255, 100, 0, 255);
-				sprite_bomb.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.085f, .085f) : sf::Vector2f(.025f, .025f);
+				sprite_bomb.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.085f, .085f) : sf::Vector2f(.045f, .045f);
 				sprite_bomb.centered = true;
 				button_info.has_sprite = true;
 				button_info.sprite_info = sprite_bomb;
+			}
+			else if (tile_visible && tile.has_radar)
+			{
+				UISpriteInfo sprite_radar;
+				sprite_radar.texture = &ui_resources.texture_radar;
+				sprite_radar.color = sf::Color(0, 100, 168, 255);
+				sprite_radar.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.085f, .085f) : sf::Vector2f(.045f, .045f);
+				sprite_radar.centered = true;
+				button_info.has_sprite = true;
+				button_info.sprite_info = sprite_radar;
 			}
 			// Tiles de bandeira: bandeira é visível apenas em tiles não revelados e marcados.
 			else if (!tile_visible && tile.has_flag)
@@ -268,7 +280,7 @@ void ui_render_board(Game* game, bool show_all)
 				UISpriteInfo sprite_flag;
 				sprite_flag.texture = &ui_resources.texture_flag;
 				sprite_flag.color = sf::Color(168, 0, 0, 255);
-				sprite_flag.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.085f, .085f) : sf::Vector2f(.025f, .025f);
+				sprite_flag.scale = (game->difficulty == GameDifficulty::BEGINNER) ? sf::Vector2f(.085f, .085f) : sf::Vector2f(.045f, .045f);
 				sprite_flag.centered = true;
 				button_info.has_sprite = true;
 				button_info.sprite_info = sprite_flag;
