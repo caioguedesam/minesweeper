@@ -8,6 +8,7 @@
 
 #define APP_NAME    "Campo Minado!"
 #define APP_DEFAULT_WIDTH       480
+#define APP_EXPANDED_WIDTH      800
 #define APP_DEFAULT_HEIGHT      480
 
 #define CLI_PRINT(MSG, ...)\
@@ -336,8 +337,8 @@ void ui_render_game(Game* game)
 		if (ui_button(panel_position, button_size, ui_button_info_default, "Expert", sf::Vector2f(0, 0), text_info, true))
 		{
 			game->start(GameDifficulty::EXPERT);
-			ui_state.window.setSize(sf::Vector2u(APP_DEFAULT_WIDTH * 1.7f, APP_DEFAULT_HEIGHT));
-			sf::FloatRect ui_view_rect = sf::FloatRect(0, 0, APP_DEFAULT_WIDTH * 1.7f, APP_DEFAULT_HEIGHT);
+			ui_state.window.setSize(sf::Vector2u(APP_EXPANDED_WIDTH, APP_DEFAULT_HEIGHT));
+			sf::FloatRect ui_view_rect = sf::FloatRect(0, 0, APP_EXPANDED_WIDTH, APP_DEFAULT_HEIGHT);
 			ui_state.window.setView(sf::View(ui_view_rect));
 		}
 
@@ -348,19 +349,35 @@ void ui_render_game(Game* game)
 	} break;
 	case GameState::ENDED:
 	{
-		//CLI_PRINTLN("============== FIM DE JOGO! ==============");
-		//if (game->is_won())
-		//{
-		//	CLI_PRINTLN("		Você GANHOU!");
-		//}
-		//else
-		//{
-		//	CLI_PRINTLN("		Você PERDEU...");
-		//}
-		//CLI_PRINTLN("==========================================");
 		ui_render_board(game, true);
-		//CLI_PRINTLN("==========================================");
-		//CLI_PRINTLN("		Pressione Enter para comecar um novo jogo:");
+
+		sf::Vector2f panel_position = sf::Vector2f(30, APP_DEFAULT_HEIGHT - 45);
+		UITextInfo text_info;
+		text_info.font = &ui_resources.font_default;
+		text_info.color = game->is_won() ? sf::Color(0, 220, 30, 255) : sf::Color(220, 0, 30, 255);
+		text_info.pixel_size = 24;
+		text_info.style = sf::Text::Style::Bold;
+		ui_text(game->is_won() ? "Você ganhou!" : "Você perdeu...", panel_position, text_info);
+
+		if (game->difficulty == GameDifficulty::EXPERT)
+		{
+			panel_position.x = APP_EXPANDED_WIDTH;
+		}
+		else
+		{
+			panel_position.x = APP_DEFAULT_WIDTH;
+		}
+
+		sf::Vector2f button_size = sf::Vector2f(150, 30);
+		panel_position.x -= button_size.x + 20;
+		panel_position.y += 5;
+		text_info.color = sf::Color(0, 0, 0, 255);
+		if (ui_button(panel_position, button_size, ui_button_info_default,
+			"Reiniciar", sf::Vector2f(0, 0), text_info, true))
+		{
+			game->reset();
+		}
+
 	} break;
 	default: break;
 	}
