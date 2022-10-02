@@ -1,5 +1,6 @@
 #include "board.h"
 #include "random.h"
+#include <stdio.h>
 #include <string.h>
 
 void Tile::reset()
@@ -42,6 +43,7 @@ void Board::init(int w, int h, int bombs)
 		if (!tile.has_bomb)
 		{
 			tile.has_bomb = true;
+			//printf("placed bomb at %d %d\n", x, y);
 			bombs--;
 		}
 	}

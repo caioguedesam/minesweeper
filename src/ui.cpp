@@ -7,7 +7,7 @@
 #include <string.h>
 
 #define APP_NAME    "Campo Minado!"
-#define APP_DEFAULT_WIDTH       640
+#define APP_DEFAULT_WIDTH       480
 #define APP_DEFAULT_HEIGHT      480
 
 #define CLI_PRINT(MSG, ...)\
@@ -23,13 +23,38 @@ do {\
 
 UIState ui_state;
 UIResources ui_resources;
-UIButtonInfo ui_colors_button_standard =
+UIButtonInfo ui_button_info_default =
 {
+	true,
 	sf::Color(189, 189, 189, 255),
 	sf::Color(150, 150, 150, 255),
 	sf::Color(82, 82, 82, 255),
 	true,
 	3.f,
+	sf::Color(150, 150, 150, 255),
+	sf::Color(82, 82, 82, 255),
+	sf::Color(82, 82, 82, 255),
+};
+UIButtonInfo ui_button_info_tile =
+{
+	true,
+	sf::Color(189, 189, 189, 255),
+	sf::Color(150, 150, 150, 255),
+	sf::Color(82, 82, 82, 255),
+	true,
+	1.f,
+	sf::Color(150, 150, 150, 255),
+	sf::Color(82, 82, 82, 255),
+	sf::Color(82, 82, 82, 255),
+};
+UIButtonInfo ui_button_info_tile_revealed =
+{
+	false,
+	sf::Color(150, 150, 150, 255),
+	sf::Color(150, 150, 150, 255),
+	sf::Color(82, 82, 82, 255),
+	true,
+	1.f,
 	sf::Color(150, 150, 150, 255),
 	sf::Color(82, 82, 82, 255),
 	sf::Color(82, 82, 82, 255),
@@ -88,7 +113,7 @@ bool ui_button(sf::Vector2f button_pos, sf::Vector2f button_size, UIButtonInfo b
 	button_rect.setOutlineColor(button_info.color_outline_standard);
 
 	bool result = false;
-	if (is_on_rectangle(sf::Vector2f(ui_state.mouse.pos_x, ui_state.mouse.pos_y), button_rect))
+	if (button_info.interactable && is_on_rectangle(sf::Vector2f(ui_state.mouse.pos_x, ui_state.mouse.pos_y), button_rect))
 	{
 		button_rect.setFillColor(button_info.color_hovered);
 		button_rect.setOutlineColor(button_info.color_outline_hovered);
@@ -214,40 +239,60 @@ void ui_render_board(Game* game, bool show_all)
 {
 	Board& board = game->board;
 
-	CLI_PRINT("%*c", 5, ' ');
+	sf::Vector2f board_origin = sf::Vector2f(25, 25);
+	sf::Vector2f tile_pos = board_origin;
+	sf::Vector2f tile_size;
+	UITextInfo tile_text_info;
+	tile_text_info.font = &ui_resources.font_default;
+	tile_text_info.style = sf::Text::Style::Bold;
 
-	for (int j = 0; j < board.width; j++)
+	if (game->difficulty == GameDifficulty::BEGINNER)
 	{
-		CLI_PRINT("%*d", 5, j);
+		tile_size = sf::Vector2f(45, 45);
+		tile_text_info.pixel_size = 32;
 	}
-	CLI_PRINTLN("");
-	for (int j = 0; j <= board.height; j++)
+	else
 	{
-		CLI_PRINT("%*c", 5, '-');
+		tile_size = sf::Vector2f(25, 25);
+		tile_text_info.pixel_size = 18;
 	}
-	CLI_PRINTLN("");
 
-	for (int i = 0; i < board.height; i++)
+	for (int x = 0; x < board.height; x++)
 	{
-		CLI_PRINT("%*d|", 4, i);
-		for (int j = 0; j < board.width; j++)
+		for (int y = 0; y < board.width; y++)
 		{
-			Tile& tile = board.grid[i][j];
-			char visual = '.';
-			if (tile.revealed || show_all)
+			Tile& tile = board.grid[x][y];
+			bool tile_visible = tile.revealed || show_all;
+			UIButtonInfo& button_info = tile_visible ? ui_button_info_tile_revealed : ui_button_info_tile;
+			tile_text_info.color = sf::Color(0, 0, 0, 255);
+			char tile_label[10];
+			if (tile_visible && tile.has_bomb)
 			{
-				if (tile.has_bomb) visual = 'X';
-				else visual = tile.adjacent_bombs + '0';
+				sprintf(tile_label, "B");
+				tile_text_info.color = sf::Color(255, 0, 0, 255);
 			}
-			else if (tile.has_flag)
+			else if (tile_visible && tile.adjacent_bombs > 0)
 			{
-				visual = 'F';
+				sprintf(tile_label, "%d", tile.adjacent_bombs);
+			}
+			else if (!tile_visible && tile.has_flag)
+			{
+				sprintf(tile_label, "F");
+				tile_text_info.color = sf::Color(0, 0, 255, 255);
+			}
+			else
+			{
+				sprintf(tile_label, " ");
+			}
+			if (ui_button(tile_pos, tile_size, button_info, tile_label, sf::Vector2f(0, 0), tile_text_info, true))
+			{
+				game->process_action(GameAction::REVEAL_TILE, x, y);
 			}
 
-			CLI_PRINT("%*c", 5, visual);
+			tile_pos.x += tile_size.x;
 		}
-		CLI_PRINTLN("");
-		CLI_PRINTLN("");
+		tile_pos.x = board_origin.x;
+		tile_pos.y += tile_size.y;
 	}
 }
 
@@ -257,14 +302,20 @@ void ui_render_game(Game* game)
 	{
 	case GameState::STARTING:
 	{
+		ui_state.window.setSize(sf::Vector2u(APP_DEFAULT_WIDTH, APP_DEFAULT_HEIGHT));
+		sf::FloatRect ui_view_rect = sf::FloatRect(0, 0, APP_DEFAULT_WIDTH, APP_DEFAULT_HEIGHT);
+		ui_state.window.setView(sf::View(ui_view_rect));
+
+		sf::Vector2f panel_position = sf::Vector2f(50, 30);
+
 		UITextInfo text_info;
 		text_info.font = &ui_resources.font_default;
 		text_info.color = sf::Color(0, 0, 0, 255);
 		text_info.pixel_size = 48;
 		text_info.style = sf::Text::Style::Bold;
-		ui_text("Campo Minado", sf::Vector2f(APP_DEFAULT_WIDTH / 2.f, 30), text_info, true);
+		ui_text("Campo Minado", panel_position, text_info);
 
-		sf::Vector2f panel_position = sf::Vector2f(30, 100);
+		panel_position.y += 100;
 		text_info.pixel_size = 32;
 		text_info.style = sf::Text::Style::Regular;
 		ui_text("Novo jogo:", panel_position, text_info);
@@ -272,19 +323,28 @@ void ui_render_game(Game* game)
 		panel_position.x += 20;
 		panel_position.y += 65;
 		sf::Vector2f button_size = sf::Vector2f(350, 50);
-		ui_button(panel_position, button_size, ui_colors_button_standard, "Iniciante", sf::Vector2f(0, 0), text_info, true);
+		if (ui_button(panel_position, button_size, ui_button_info_default, "Iniciante", sf::Vector2f(0, 0), text_info, true))
+		{
+			game->start(GameDifficulty::BEGINNER);
+		}
 		panel_position.y += 80;
-		ui_button(panel_position, button_size, ui_colors_button_standard, "Intermediário", sf::Vector2f(0, 0), text_info, true);
+		if(ui_button(panel_position, button_size, ui_button_info_default, "Intermediário", sf::Vector2f(0, 0), text_info, true))
+		{
+			game->start(GameDifficulty::INTERMEDIATE);
+		}
 		panel_position.y += 80;
-		ui_button(panel_position, button_size, ui_colors_button_standard, "Expert", sf::Vector2f(0, 0), text_info, true);
+		if (ui_button(panel_position, button_size, ui_button_info_default, "Expert", sf::Vector2f(0, 0), text_info, true))
+		{
+			game->start(GameDifficulty::EXPERT);
+			ui_state.window.setSize(sf::Vector2u(APP_DEFAULT_WIDTH * 1.7f, APP_DEFAULT_HEIGHT));
+			sf::FloatRect ui_view_rect = sf::FloatRect(0, 0, APP_DEFAULT_WIDTH * 1.7f, APP_DEFAULT_HEIGHT);
+			ui_state.window.setView(sf::View(ui_view_rect));
+		}
 
 	} break;
 	case GameState::PLAYING:
 	{
-		CLI_PRINTLN("==========================================");
 		ui_render_board(game);
-		CLI_PRINTLN("==========================================");
-		CLI_PRINTLN("		Proxima posicao:");
 	} break;
 	case GameState::ENDED:
 	{

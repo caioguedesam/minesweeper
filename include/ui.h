@@ -20,6 +20,7 @@ bool is_on_rectangle(sf::Vector2f point, const sf::RectangleShape& rectangle);
 
 struct UIButtonInfo
 {
+	bool interactable = true;
 	sf::Color color_standard;
 	sf::Color color_hovered;
 	sf::Color color_pressed;
