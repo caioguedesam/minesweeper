@@ -253,7 +253,7 @@ void ui_render_board(Game* game, bool show_all)
 			UIButtonInfo& button_info = tile_visible ? ui_button_info_tile_revealed : ui_button_info_tile;
 			tile_text_info.color = sf::Color(0, 0, 0, 255);
 			char tile_label[10];
-			if (tile_visible && !tile.has_bomb && !tile.has_flag && tile.adjacent_bombs > 0)
+			if (tile_visible && !tile.has_bomb && tile.adjacent_bombs > 0)
 			{
 				tile_text_info.color = tile_indicator_colors[tile.adjacent_bombs - 1];
 				sprintf(tile_label, "%d", tile.adjacent_bombs);
